@@ -1,60 +1,38 @@
-import React, { useRef, useEffect } from 'react';
-import * as THREE from 'three';
+import React, { useRef, useState } from 'react';
+import { Canvas, useFrame } from '@react-three/fiber';
+import { Mesh } from 'three';
 
-const ThreeScene: React.FC = () => {
-  const mountRef = useRef<HTMLDivElement>(null);
+const Box = (props: JSX.IntrinsicElements['mesh']) => {
+  const mesh = useRef<Mesh>(null);
+  const [hovered, setHover] = useState(false);
+  const [active, setActive] = useState(false);
 
-  useEffect(() => {
-    // Scene, Camera, Renderer 설정
-    const scene = new THREE.Scene();
-    const camera = new THREE.PerspectiveCamera(75, window.innerWidth / window.innerHeight, 0.1, 1000);
-    const renderer = new THREE.WebGLRenderer();
-    renderer.setSize(window.innerWidth, window.innerHeight);
+  useFrame((state, delta) => (mesh.current!.rotation.x += 0.01));
 
-    if (mountRef.current) {
-      mountRef.current.appendChild(renderer.domElement);
-    }
-
-    // 큐브 생성
-    const geometryCube = new THREE.BoxGeometry();
-    const materialCube = new THREE.MeshBasicMaterial({ color: 0x00ff00 });
-    const cube = new THREE.Mesh(geometryCube, materialCube);
-    scene.add(cube);
-
-    // 구 생성
-    const geometrySphere = new THREE.SphereGeometry();
-    const materialSphere = new THREE.MeshBasicMaterial({ color: 0xff0000, wireframe: true });
-    const sphere = new THREE.Mesh(geometrySphere, materialSphere);
-    sphere.position.x = 2; // 큐브와 구분하기 위해 위치 조정
-    scene.add(sphere);
-
-    camera.position.z = 5;
-
-    // 렌더링 루프
-    const animate = function () {
-      requestAnimationFrame(animate);
-
-      // 도형 회전
-      cube.rotation.x += 0.01;
-      cube.rotation.y += 0.01;
-
-      sphere.rotation.x += 0.01;
-      sphere.rotation.y += 0.01;
-
-      renderer.render(scene, camera);
-    };
-
-    animate();
-
-    // 정리 코드
-    return () => {
-      if (mountRef.current) {
-        mountRef.current.removeChild(renderer.domElement);
-      }
-    };
-  }, []);
-
-  return <div ref={mountRef}></div>;
+  return (
+    <mesh
+      {...props}
+      ref={mesh}
+      scale={active ? 1.5 : 1}
+      onClick={(event) => setActive(!active)}
+      onPointerOver={(event) => setHover(true)}
+      onPointerOut={(event) => setHover(false)}
+    >
+      <boxGeometry args={[1, 1, 1]} />
+      <meshStandardMaterial color={hovered ? 'hotpink' : 'orange'} />
+    </mesh>
+  );
 };
 
-export default ThreeScene;
+const App = () => {
+  return (
+    <Canvas>
+      <ambientLight />
+      <pointLight position={[10, 10, 10]} />
+      <Box position={[-1.2, 0, 0]} />
+      <Box position={[1.2, 0, 0]} />
+    </Canvas>
+  );
+};
+
+export default App;

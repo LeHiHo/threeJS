@@ -14,7 +14,6 @@ const MainRouter = () => {
     <Router>
       <Routes>
         <Route path="/" element={<One/>} />
-        <Route path="/two" element={<Two position={new THREE.Vector3(0,0,0)} velocity={new THREE.Vector3(0,0,0)} mass={1} size={1} color="red"/>} />
       </Routes>
   </Router>
   );
